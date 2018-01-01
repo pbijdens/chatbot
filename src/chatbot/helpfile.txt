@@ -1,0 +1,7 @@
+﻿<b>Help!</b>
+
+Gebruik in een privé chat met de bot het commando "/vw" om je lijst met verboden woorden te beheren.
+
+Gebruik in een publieke chat de commando's /geraden, /geradenvan, en /stats.
+
+<i>Als je nog vragen, change requests, of opmerkingen hebt, neem contact op met @PieterBass.</i>
