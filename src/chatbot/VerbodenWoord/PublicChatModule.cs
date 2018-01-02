@@ -108,7 +108,7 @@ namespace chatbot.VerbodenWoord
                 {
                     string expr = string.Join("|", record.Woorden.Select(x => $"{Regex.Escape(x)}").OrderBy(x => x).Distinct());
                     string pattern = $@"(?:^|[{RegexInterpunction}\s])({expr})(?:$|[{RegexInterpunction}\s])";
-                    if (Regex.IsMatch(input, expr))
+                    if (Regex.IsMatch(input, expr, RegexOptions.IgnoreCase))
                     {
                         matchingRecords.Add(record);
                     }
