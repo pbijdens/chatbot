@@ -202,7 +202,7 @@ namespace chatbot.VerbodenWoord
                         record.Woorden = ParseWoordenInputFromMessage(data[0]);
                         record.ID = ShortGuid.NewGuid().ToString();
                         record.CreationDate = DateTime.UtcNow;
-                        record.OwnerName = e.Message.From.DisplayName();
+                        record.OwnerName = e.Message.From.UsernameOrName();
                         record.OwnerUserId = e.Message.From.ID;
                         GetVerbodenWoordCollection().Insert(record);
                         _publicChatModules.ForEach(x => x.OnWordsChanged());

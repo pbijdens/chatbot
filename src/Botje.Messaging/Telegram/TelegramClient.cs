@@ -14,14 +14,19 @@ namespace Botje.Messaging.Telegram
 {
     public class TelegramClient : IMessagingClient
     {
+
         private readonly TimeSpan GetMeTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan SendMessageToChatTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan AnswerCallbackQueryTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan EditMessageTextTimeout = TimeSpan.FromSeconds(30);
         private readonly TimeSpan AnswerInlineQueryTimeout = TimeSpan.FromSeconds(5);
         private readonly TimeSpan ForwardMessageTimeout = TimeSpan.FromSeconds(5);
-
+#if DEBUG
+        private readonly TimeSpan MessageProcessingTimeout = TimeSpan.FromHours(24);
+#else
         private readonly TimeSpan MessageProcessingTimeout = TimeSpan.FromSeconds(37);
+#endif
+
         private readonly TimeSpan MessageProcessingErrorFixedDelay = TimeSpan.FromMilliseconds(503);
         private readonly TimeSpan MessageProcessingMinimumPollingInterval = TimeSpan.FromMilliseconds(1009);
 

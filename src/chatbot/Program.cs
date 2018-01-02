@@ -65,6 +65,7 @@ namespace chatbot
             // Set up the components
             kernel.Bind<IBotModule>().To<VerbodenWoord.PrivateChatModule>().InSingletonScope();
             kernel.Bind<IBotModule>().To<VerbodenWoord.PublicChatModule>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<ChatStats.PublicChatModule>().InSingletonScope();
 
             var modules = kernel.GetAll<IBotModule>().ToList();
 

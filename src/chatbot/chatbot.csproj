@@ -33,8 +33,4 @@
     <ProjectReference Include="..\Botje.Messaging\Botje.Messaging.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ChatStats\" />
-  </ItemGroup>
-
 </Project>

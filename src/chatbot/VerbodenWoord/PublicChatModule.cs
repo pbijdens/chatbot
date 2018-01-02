@@ -134,8 +134,8 @@ namespace chatbot.VerbodenWoord
                     var geradenWoord = new GeradenWoord
                     {
                         GuessedByUserId = e.Message.From.ID,
-                        GuessedByUserName = e.Message.From.DisplayName(),
-                        GuessedByUserNameLowerCase = e.Message.From.DisplayName().ToLower(),
+                        GuessedByUserName = e.Message.From.UsernameOrName(),
+                        GuessedByUserNameLowerCase = e.Message.From.UsernameOrName().ToLower(),
                         Message = e.Message,
                         OwnerUserId = match.OwnerUserId,
                         OwnerUserName = match.OwnerName,
