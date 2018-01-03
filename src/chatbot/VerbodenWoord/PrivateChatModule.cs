@@ -32,10 +32,10 @@ namespace chatbot.VerbodenWoord
         [Inject]
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
 
-        private List<PublicChatModule> _publicChatModules = new List<PublicChatModule>();
+        private List<ProcessVerbodenWoord> _publicChatModules = new List<ProcessVerbodenWoord>();
 
         [Inject]
-        public IBotModule[] Modules { set { _publicChatModules = value.OfType<PublicChatModule>().ToList(); } }
+        public IBotModule[] Modules { set { _publicChatModules = value.OfType<ProcessVerbodenWoord>().ToList(); } }
 
         const string RegexInterpunction = @"\!\.\,\;\:\?\""\(\)\[\]";
 

@@ -4,18 +4,16 @@ using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.Events;
 using Botje.Messaging.Models;
-using Botje.Messaging.PrivateConversation;
 using chatbot.ChatStats.Model;
 using Ninject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace chatbot.ChatStats
 {
-    public class PublicChatModule : IBotModule
+    public class ChatStatsCommands : IBotModule
     {
         private ILogger _log;
 
@@ -26,19 +24,9 @@ namespace chatbot.ChatStats
         public IDatabase DB { get; set; }
 
         [Inject]
-        public IPrivateConversationManager ConversationManager { get; set; }
-
-        [Inject]
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
 
-        [Inject]
-        public IBotModule[] Modules { set { } }
-
         private DbSet<Model.UserStatistics> GetStatisticsCollection() => DB.GetCollection<Model.UserStatistics>("userstats");
-
-        private object _statsLock = new object();
-
-        private static readonly string[] Maanden = new string[] { "januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december" };
 
         public void Shutdown()
         {
@@ -70,137 +58,7 @@ namespace chatbot.ChatStats
                     ProcessCommand(e, commandText);
                 }
             }
-            else
-            {
-                UpdateStats(e);
-            }
         }
-
-        private void UpdateStats(PublicMessageEventArgs e)
-        {
-            if (e.Message.Chat == null) return;
-
-            lock (_statsLock)
-            {
-                var collection = GetStatisticsCollection();
-
-                var message = e.Message;
-
-                if (message.From != null)
-                {
-                    GetAndUpdate(collection, message.Chat.ID, message.From, (bucket) =>
-                    {
-                        bucket.TotalMessages++;
-                        bucket.MessagesByType[(int)message.Type]++;
-
-                        if (message.ForwardFrom != null) bucket.Forwards++;
-                        if (message.Sticker != null) bucket.Stickers++;
-                        if (message.ReplyToMessage != null) bucket.Replies++;
-
-                        message.Entities.ForEach((x) =>
-                        {
-                            // 	Type of the entity. Can be mention (@username), hashtag, bot_command, url, email, bold (bold text), italic (italic text), code (monowidth string), pre (monowidth block), text_link (for clickable text URLs), text_mention (for users without usernames)
-                            switch (x.Type)
-                            {
-                                case "hashtag":
-                                    bucket.Hashtags++;
-                                    break;
-                                case "mention":
-                                    bucket.Mentions++;
-                                    break;
-                                case "text_mention":
-                                    bucket.Mentions++;
-                                    break;
-                                case "text_link":
-                                case "url":
-                                    bucket.URLs++;
-                                    break;
-                            }
-                        });
-
-                        if (message.Type == MessageType.TextMessage && !string.IsNullOrEmpty(message.Text))
-                        {
-                            bucket.Characters += message.Text.Length;
-                            bucket.Words += Regex.Split(message.Text, @"\s").Where(x => !string.IsNullOrWhiteSpace(x)).Count();
-                            bucket.Lines += message.Text.Split("\n").Where(x => !string.IsNullOrWhiteSpace(x)).Count();
-                        }
-                    });
-                }
-
-                if (message.ForwardFrom != null)
-                {
-                    GetAndUpdate(collection, message.Chat.ID, message.ForwardFrom, (bucket) => { bucket.Forwarded++; });
-                }
-
-                if (message.ReplyToMessage != null && message.ReplyToMessage.From != null)
-                {
-                    GetAndUpdate(collection, message.Chat.ID, message.ReplyToMessage.From, (bucket) => { bucket.Replied++; });
-                }
-
-                if (message.LeftChatMember != null)
-                {
-                    GetAndUpdate(collection, message.Chat.ID, message.LeftChatMember, (bucket) => { bucket.Left++; });
-                }
-
-                if (message.NewChatMembers != null)
-                {
-                    message.NewChatMembers.ForEach(x => GetAndUpdate(collection, message.Chat.ID, x, (bucket) => { bucket.Joined++; }));
-                }
-
-                if (message.Entities.Count > 0)
-                {
-                    int index = 0;
-                    message.Entities.ForEach(entity =>
-                    {
-                        if (null != entity.User)
-                        {
-                            GetAndUpdate(collection, message.Chat.ID, entity.User, (bucket) => { bucket.Mentioned++; });
-                        }
-                        else if (entity.Type == "text_mention" || entity.Type == "mention")
-                        {
-                            string userName = message.Text.Substring(entity.Offset, entity.Length).TrimStart('@')?.ToLower();
-                            var user = collection.Find((x) => x.UserNameLowerCase == userName && x.ChatID == e.Message.Chat?.ID).FirstOrDefault();
-                            if (null != user)
-                            {
-                                var bucket = user.GetOrCreateBucket(DateTime.UtcNow);
-                                bucket.Mentioned++;
-                                collection.Update(user);
-                            }
-                        }
-                        index++;
-                    });
-                }
-            }
-
-        }
-
-        private void GetAndUpdate(DbSet<UserStatistics> collection, long chatID, User user, Action<UserStatisticsBucket> action)
-        {
-            var userRecord = collection.Find((x) => x.UserId == user.ID && x.ChatID == chatID).FirstOrDefault();
-            if (null == userRecord)
-            {
-                userRecord = new UserStatistics()
-                {
-                    UserId = user.ID,
-                    UserName = user.UsernameOrName(),
-                    UserNameLowerCase = user.UsernameOrName().ToLowerInvariant(),
-                    ChatID = chatID,
-                };
-                collection.Insert(userRecord);
-            }
-            else
-            {
-                userRecord.UserName = user.UsernameOrName();
-                userRecord.UserNameLowerCase = user.UsernameOrName().ToLowerInvariant();
-            }
-            var userRecordBucket = userRecord.GetOrCreateBucket(DateTime.UtcNow);
-
-            action(userRecordBucket);
-
-            collection.Update(userRecord);
-        }
-
-        // COMMANDS
 
         private void ProcessCommand(PublicMessageEventArgs e, string command)
         {
@@ -229,7 +87,6 @@ namespace chatbot.ChatStats
                 case "/me":
                     ShowStatsForUser(args, e);
                     break;
-
             }
         }
 
@@ -238,7 +95,7 @@ namespace chatbot.ChatStats
             TimeSpan ago = TimeSpan.FromDays(14);
             string agoParam = "2w";
             if (args.Length >= 1) agoParam = args[0];
-            try { ago = ParseTimeSpan(agoParam); }
+            try { ago = TimeUtils.ParseTimeSpan(agoParam); }
             catch (FormatException)
             {
                 Client.SendMessageToChat(e.Message.Chat.ID, $"Ik snap er niks van. Wat bedoel je met '{MessageUtils.HtmlEscape(agoParam)}'? Probeer eens '5d', '8u', '4w' of doe gek met '3w2d7u'.", "HTML", true);
@@ -339,7 +196,6 @@ namespace chatbot.ChatStats
         private void ShowStatsTopList(string[] args, PublicMessageEventArgs e, string what, Func<UserStatisticsBucket, int> countMember)
         {
             TimeSpan ago = TimeSpan.Zero;
-            int number = 0;
             string agoParam = "2w";
             string numParam = "42";
 
@@ -348,7 +204,7 @@ namespace chatbot.ChatStats
 
             try
             {
-                ago = ParseTimeSpan(agoParam);
+                ago = TimeUtils.ParseTimeSpan(agoParam);
             }
             catch (FormatException)
             {
@@ -356,7 +212,7 @@ namespace chatbot.ChatStats
                 return;
             }
 
-            if (!Int32.TryParse(numParam, out number))
+            if (!Int32.TryParse(numParam, out int number))
             {
                 Client.SendMessageToChat(e.Message.Chat.ID, $"Ik snap er niks van. Wat bedoel je met '{MessageUtils.HtmlEscape(agoParam)}'? Hoe moet ik daar een getal van maken?", "HTML", true);
                 return;
@@ -392,7 +248,7 @@ namespace chatbot.ChatStats
             if (sortedAggregatedCollection.Count() < number) { number = sortedAggregatedCollection.Count(); }
 
             StringBuilder result = new StringBuilder();
-            result.AppendLine($"Top <b>{number}</b> {what} vanaf <b>{Format(DateTime.Now - ago)}</b>:");
+            result.AppendLine($"Top <b>{number}</b> {what} vanaf <b>{TimeUtils.AsDutchString(DateTime.Now - ago)}</b>:");
             int place = 1;
             foreach (var record in sortedAggregatedCollection)
             {
@@ -402,46 +258,6 @@ namespace chatbot.ChatStats
             result.AppendLine($"<i>Totaal aantal {what}: {grandTotal} voor {allStats.Count()} personen</i>");
 
             Client.SendMessageToChat(e.Message.Chat.ID, $"{result}", "HTML", disableWebPagePreview: true, disableNotification: true);
-        }
-
-        private static string Format(DateTime dt)
-        {
-            return $"{dt.Day} {Maanden[dt.Month - 1]} {dt.ToString("HH:mm")}";
-        }
-
-        private TimeSpan ParseTimeSpan(string v)
-        {
-            TimeSpan result = TimeSpan.Zero;
-            string number = "";
-            foreach (char c in v)
-            {
-                if (char.IsDigit(c))
-                {
-                    number += c;
-                }
-                else
-                {
-                    switch (c)
-                    {
-                        case 'd':
-                            result += TimeSpan.FromDays(Int32.Parse(number));
-                            break;
-                        case 'w':
-                            result += TimeSpan.FromDays(7 * Int32.Parse(number));
-                            break;
-                        case 'h':
-                        case 'u':
-                            result += TimeSpan.FromHours(Int32.Parse(number));
-                            break;
-                    }
-                    number = "";
-                }
-            }
-            if (!string.IsNullOrWhiteSpace(number))
-            {
-                result += TimeSpan.FromDays(Int32.Parse(number));
-            }
-            return result;
         }
 
         private class ResultLine
