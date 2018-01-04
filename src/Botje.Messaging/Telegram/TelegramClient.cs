@@ -90,7 +90,7 @@ namespace Botje.Messaging.Telegram
                 {
                     var request = new RestRequest("getUpdates", Method.POST);
                     request.AddParameter("offset", GetNextUpdateID());
-                    request.AddParameter("limit", 100);
+                    request.AddParameter("limit", 25);
                     request.AddParameter("timeout", 2);
                     request.AddParameter("allowed_updates", new[] { "message", "edited_message", "inline_query", "chosen_inline_result", "callback_query" });
 
@@ -177,51 +177,58 @@ namespace Botje.Messaging.Telegram
         {
             Log.Trace($"Processing update with ID: {update.UpdateID} and type: {update.GetUpdateType()}");
 
-            if (update.CallbackQuery != null)
+            try
             {
-                OnQueryCallback?.Invoke(this, new QueryCallbackEventArgs(update.UpdateID, update.CallbackQuery));
-            }
-            else if (update.ChannelPost != null)
-            {
-                OnChannelMessage?.Invoke(this, new ChannelMessageEventArgs(update.UpdateID, update.ChannelPost));
-            }
-            else if (update.ChosenInlineResult != null)
-            {
-                OnChosenInlineQueryResult?.Invoke(this, new ChosenInlineQueryResultEventArgs(update.UpdateID, update.ChosenInlineResult));
-            }
-            else if (update.EditedChannelPost != null)
-            {
-                OnChannelMessageEdited?.Invoke(this, new ChannelMessageEditedEventArgs(update.UpdateID, update.EditedChannelPost));
-            }
-            else if (update.InlineQuery != null)
-            {
-                OnInlineQuery?.Invoke(this, new InlineQueryEventArgs(update.UpdateID, update.InlineQuery));
-            }
-            else if (update.EditedMessage != null)
-            {
-                if (string.Equals(update.EditedMessage.Chat.Type, "private", StringComparison.InvariantCultureIgnoreCase))
+                if (update.CallbackQuery != null)
                 {
-                    OnPrivateMessageEdited?.Invoke(this, new PrivateMessageEditedEventArgs(update.UpdateID, update.EditedMessage));
+                    OnQueryCallback?.Invoke(this, new QueryCallbackEventArgs(update.UpdateID, update.CallbackQuery));
+                }
+                else if (update.ChannelPost != null)
+                {
+                    OnChannelMessage?.Invoke(this, new ChannelMessageEventArgs(update.UpdateID, update.ChannelPost));
+                }
+                else if (update.ChosenInlineResult != null)
+                {
+                    OnChosenInlineQueryResult?.Invoke(this, new ChosenInlineQueryResultEventArgs(update.UpdateID, update.ChosenInlineResult));
+                }
+                else if (update.EditedChannelPost != null)
+                {
+                    OnChannelMessageEdited?.Invoke(this, new ChannelMessageEditedEventArgs(update.UpdateID, update.EditedChannelPost));
+                }
+                else if (update.InlineQuery != null)
+                {
+                    OnInlineQuery?.Invoke(this, new InlineQueryEventArgs(update.UpdateID, update.InlineQuery));
+                }
+                else if (update.EditedMessage != null)
+                {
+                    if (string.Equals(update.EditedMessage.Chat.Type, "private", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        OnPrivateMessageEdited?.Invoke(this, new PrivateMessageEditedEventArgs(update.UpdateID, update.EditedMessage));
+                    }
+                    else
+                    {
+                        OnPublicMessageEdited?.Invoke(this, new PublicMessageEditedEventArgs(update.UpdateID, update.EditedMessage));
+                    }
+                }
+                else if (update.Message != null)
+                {
+                    if (string.Equals(update.Message.Chat.Type, "private", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        OnPrivateMessage?.Invoke(this, new PrivateMessageEventArgs(update.UpdateID, update.Message));
+                    }
+                    else
+                    {
+                        OnPublicMessage?.Invoke(this, new PublicMessageEventArgs(update.UpdateID, update.Message));
+                    }
                 }
                 else
                 {
-                    OnPublicMessageEdited?.Invoke(this, new PublicMessageEditedEventArgs(update.UpdateID, update.EditedMessage));
+                    Log.Trace($"Not processing message of type {update.GetUpdateType()}");
                 }
             }
-            else if (update.Message != null)
+            catch (Exception ex)
             {
-                if (string.Equals(update.Message.Chat.Type, "private", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    OnPrivateMessage?.Invoke(this, new PrivateMessageEventArgs(update.UpdateID, update.Message));
-                }
-                else
-                {
-                    OnPublicMessage?.Invoke(this, new PublicMessageEventArgs(update.UpdateID, update.Message));
-                }
-            }
-            else
-            {
-                Log.Trace($"Not processing message of type {update.GetUpdateType()}");
+                Log.Error(ex, $"Processing update with ID #{update.UpdateID} failed. Ignoring message.");
             }
         }
 

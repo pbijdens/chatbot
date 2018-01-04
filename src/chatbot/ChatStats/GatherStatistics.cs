@@ -94,14 +94,15 @@ namespace chatbot.ChatStats
                             }
                         });
 
+                        string messageTextRaw = $"{message.Text}{message.Caption}";
                         string messageText = $"{message.Text}{message.Caption}";
                         messageText = Regex.Replace(messageText, @"\s+", " ").Trim();
 
                         if (message.Type == MessageType.TextMessage && !string.IsNullOrWhiteSpace(messageText) && null == message.ForwardFrom)
                         {
                             bucket.Characters += messageText.Length;
-                            bucket.Words += Regex.Split(message.Text, @"\s").Where(x => !string.IsNullOrWhiteSpace(x)).Count(); // use original
-                            bucket.Lines += message.Text.Split("\n").Where(x => !string.IsNullOrWhiteSpace(x)).Count(); // use original
+                            bucket.Words += Regex.Split(messageTextRaw, @"\s").Where(x => !string.IsNullOrWhiteSpace(x)).Count(); // use original
+                            bucket.Lines += messageTextRaw.Split("\n").Where(x => !string.IsNullOrWhiteSpace(x)).Count(); // use original
                         }
                     });
                 }
