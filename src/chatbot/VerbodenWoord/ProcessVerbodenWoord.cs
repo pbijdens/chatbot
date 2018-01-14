@@ -52,9 +52,13 @@ namespace chatbot.VerbodenWoord
         private void Client_OnPublicMessage(object sender, Botje.Messaging.Events.PublicMessageEventArgs e)
         {
             var firstEntity = e.Message?.Entities?.FirstOrDefault();
-            if (null == firstEntity || firstEntity.Offset != 0 || firstEntity.Type != "bot_command")
+            if (e.Message.ForwardFrom == null && (null == firstEntity || firstEntity.Offset != 0 || firstEntity.Type != "bot_command"))
             {
-                DetectForbiddenWord(e);
+                bool isduplicate = IsDuplicateInput(e);
+                if (!isduplicate)
+                {
+                    DetectForbiddenWord(e);
+                }
             }
         }
 
@@ -148,6 +152,50 @@ namespace chatbot.VerbodenWoord
 
             var matches = re.IsMatch(input);
             return matches;
+        }
+
+        private bool IsDuplicateInput(PublicMessageEventArgs e)
+        {
+            // clean up the input, lowercase it and replace all consecutive non-readable characters to a single _
+            string str = Regex.Replace($"{e.Message?.Text}{e.Message?.Caption}".ToLowerInvariant(), "[^a-zA-Z0-9]*", "_");
+            if (str.Length < 128) return false;
+            var hash = HashUtils.CalculateSHA1Hash(str);
+            var hashCollection = DB.GetCollection<MessageHash>();
+            var hashRecord = hashCollection.Find(x => x.Hash == hash).FirstOrDefault();
+            if (hashRecord != null)
+            {
+                InsultUserForCopyPasting(e, hashRecord);
+                return true;
+            }
+            else
+            {
+                hashRecord = new MessageHash
+                {
+                    Hash = hash,
+                    User = e.Message.From,
+                    UtcWhen = DateTime.UtcNow,
+                    MessageID = e.Message.MessageID,
+                    ChatID = e.Message.Chat.ID
+                };
+                hashCollection.Insert(hashRecord);
+                _log.Info($"{e.Message.From.ShortName()} just sent a long message with hash {hash}, which I promptly stored.");
+                return false;
+            }
+        }
+
+        private void InsultUserForCopyPasting(PublicMessageEventArgs e, MessageHash hashRecord)
+        {
+            string[] allReplies = System.IO.File.ReadAllLines("taunts.duplicate.txt").Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+            string replyFmt = allReplies[_rnd.Next(allReplies.Length)];
+            string replyStr = String.Format(replyFmt,
+                MessageUtils.HtmlEscape(hashRecord.User.ShortName()),
+                TimeUtils.AsReadableTimespan(DateTime.UtcNow - hashRecord.UtcWhen),
+                MessageUtils.HtmlEscape(e.Message.From.ShortName()), // {0}
+                hashRecord.MessageID, // {1}
+                hashRecord.ChatID // {2}
+                );
+            _log.Info($"{e.Message.From.ShortName()} just duplicated {hashRecord.User.ShortName()}'s message and got abused with reply {replyStr}");
+            Client.SendMessageToChat(e.Message.Chat.ID, replyStr, "HTML", true, false, e.Message.MessageID);
         }
     }
 }

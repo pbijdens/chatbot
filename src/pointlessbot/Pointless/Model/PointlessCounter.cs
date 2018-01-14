@@ -34,7 +34,7 @@ namespace pointlessbot.Pointless.Model
             result.inline_keyboard = new List<List<InlineKeyboardButton>>();
             var row = new List<InlineKeyboardButton>();
             row.Add(new InlineKeyboardButton { text = $"-1", callback_data = $"{CounterCommandModule.CcmMinus}:{ID}" });
-            row.Add(new InlineKeyboardButton { text = $"📣", callback_data = $"{CounterCommandModule.CcmRepost}:{ID}" });
+            // row.Add(new InlineKeyboardButton { text = $"📣", callback_data = $"{CounterCommandModule.CcmRepost}:{ID}" });
             row.Add(new InlineKeyboardButton { text = $"+1", callback_data = $"{CounterCommandModule.CcmPlus}:{ID}" });
             result.inline_keyboard.Add(row);
             return result;

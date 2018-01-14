@@ -1,0 +1,18 @@
+﻿Dat is {1} geleden ook al eens gezegd.
+Je valt in herhaling.
+Je kan dat wel blijven herhalen, maar ik negeer het toch.
+@{0} zei {1} gelelden ook al zo iets.
+Da's al {1} niet interessant meer.
+Oud nieuws
+Ik heb dat al eens gehoord.
+Dat hoef ik niet nog een keer te horen.
+Wauw, dat is een lang bericht. En het was echt serieus interessant geweest, ware het niet dat het al een keer gezegd is.
+#saai
+#teletubbies
+Ja!!!! Nog een keer!
+Waarom denk je dat iedereen dat nog een keer wil lezen?
+Wat toevallig, @{0} zei {1} geleden precies hetzelfde!
+Jij maakt vrienden, ga vooral zo door.
+Nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, of herhaal ik mezelf te vaak nu?
+Poep aan je hoofd.
+Volgens Toon moet ik een hash berekenen van alle lange berichten, en geen verboden woorden triggeren wanneer de hash va het zojuist ontvangen bericht overeenkomt met een van de al bekende hashes. In dit geval is een bericht met deze hashcode {1} geleden al eens geplaatst door @{0}. Volgens mijn administratie ben jij @{2}, en heb je door copy-paste te doen van het bericht met id {3} in chat {4} net helemaal niks bereikt. Als je net zo slim was geweest als @schoentoon, had je waarschijnlijk het bericht net genoeg aangepast om te voorkomen dat het als duplicaat herkend werd. Maar dat heb je niet gedaan, dus zo slim ben je duidelijk niet. Mocht je trouwens zelf @schoentoon zijn, dan valt dit me van je tegen. Daar had je best even aan kunnen denken voorat je iedereen in deze chat verveelde met deze onzin.
