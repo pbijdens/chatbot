@@ -188,11 +188,11 @@ namespace chatbot.VerbodenWoord
             string[] allReplies = System.IO.File.ReadAllLines("taunts.duplicate.txt").Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             string replyFmt = allReplies[_rnd.Next(allReplies.Length)];
             string replyStr = String.Format(replyFmt,
-                MessageUtils.HtmlEscape(hashRecord.User.ShortName()),
-                TimeUtils.AsReadableTimespan(DateTime.UtcNow - hashRecord.UtcWhen),
-                MessageUtils.HtmlEscape(e.Message.From.ShortName()), // {0}
-                hashRecord.MessageID, // {1}
-                hashRecord.ChatID // {2}
+                MessageUtils.HtmlEscape(hashRecord.User.ShortName()), // {0}
+                TimeUtils.AsReadableTimespan(DateTime.UtcNow - hashRecord.UtcWhen), // {1}
+                MessageUtils.HtmlEscape(e.Message.From.ShortName()), // {2}
+                hashRecord.MessageID, // {3}
+                hashRecord.ChatID // {4}
                 );
             _log.Info($"{e.Message.From.ShortName()} just duplicated {hashRecord.User.ShortName()}'s message and got abused with reply {replyStr}");
             Client.SendMessageToChat(e.Message.Chat.ID, replyStr, "HTML", true, false, e.Message.MessageID);

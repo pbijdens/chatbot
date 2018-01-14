@@ -15,4 +15,12 @@ Wat toevallig, @{0} zei {1} geleden precies hetzelfde!
 Jij maakt vrienden, ga vooral zo door.
 Nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, nee, of herhaal ik mezelf te vaak nu?
 Poep aan je hoofd.
-Volgens Toon moet ik een hash berekenen van alle lange berichten, en geen verboden woorden triggeren wanneer de hash va het zojuist ontvangen bericht overeenkomt met een van de al bekende hashes. In dit geval is een bericht met deze hashcode {1} geleden al eens geplaatst door @{0}. Volgens mijn administratie ben jij @{2}, en heb je door copy-paste te doen van het bericht met id {3} in chat {4} net helemaal niks bereikt. Als je net zo slim was geweest als @schoentoon, had je waarschijnlijk het bericht net genoeg aangepast om te voorkomen dat het als duplicaat herkend werd. Maar dat heb je niet gedaan, dus zo slim ben je duidelijk niet. Mocht je trouwens zelf @schoentoon zijn, dan valt dit me van je tegen. Daar had je best even aan kunnen denken voorat je iedereen in deze chat verveelde met deze onzin.
+Volgens Toon moet ik een hash berekenen van alle lange berichten, en geen verboden woorden triggeren wanneer de hash va het zojuist ontvangen bericht overeenkomt met een van de al bekende hashes. In dit geval is een bericht met deze hashcode {1} geleden al eens geplaatst door @{0}. Volgens mijn administratie ben jij @{2}, en heb je door copy-paste te doen van het bericht met id {3} in chat {4} net helemaal niks bereikt. Als je net zo slim was geweest als @schoentoon, had je waarschijnlijk het bericht net genoeg aangepast om te voorkomen dat het als duplicaat herkend werd. Maar dat heb je niet gedaan, dus zo slim ben je duidelijk niet. Mocht je trouwens zelf @schoentoon zijn, dan valt dit me van je tegen. Daar had je best even aan kunnen denken voordat je iedereen in deze chat verveelde met deze onzin.
+I'm having a deja moo...I've read this bullshit before.
+Doe eens niet!
+Hou eens op!
+Ik heb een deja vu. 
+Really?
+Vind je het nodig?
+Waarom doe je dit?
+Best wel irritant, weer hetzelfde bericht.
