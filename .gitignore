@@ -260,6 +260,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-src/chatbot/settings.*.json
-src/chatbot/build_release.bat
-src/chatbot/Data/*
+**/settings.*.json
+**/build_release.bat
+**/Data/*
