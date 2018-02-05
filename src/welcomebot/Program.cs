@@ -58,6 +58,7 @@ namespace welcomebot
             kernel.Bind<IConsoleCommand>().To<LogLevelCommand>().InSingletonScope();
             kernel.Bind<IConsoleCommand>().To<ConsoleCommands.MeCommand>().InSingletonScope();
             kernel.Bind<IBotModule>().To<TG.WhereAmI>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<TG.SendPinnedMessageOnJoin>().InSingletonScope();
 
             var modules = kernel.GetAll<IBotModule>().ToList();
 

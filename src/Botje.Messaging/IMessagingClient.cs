@@ -114,5 +114,7 @@ namespace Botje.Messaging
         void AnswerInlineQuery(string queryID, List<InlineQueryResultArticle> results);
 
         void ForwardMessageToChat(long chatID, long sourceChat, long sourceMessageID);
+
+        Chat GetChat(long chatID);
     }
 }

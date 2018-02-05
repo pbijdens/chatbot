@@ -445,7 +445,6 @@ namespace Botje.Messaging.Telegram
             public string switch_pm_parameter { get; set; }
         }
 
-
         public virtual void AnswerInlineQuery(string queryID, List<InlineQueryResultArticle> results)
         {
             Log.Trace($"Invoked: AnswerInlineQuery(queryID={queryID},results={results})");
@@ -536,5 +535,57 @@ namespace Botje.Messaging.Telegram
             }
             sw.Stop();
         }
+
+        private class GetChatParams
+        {
+            public string chat_id { get; set; }
+        }
+
+        public Chat GetChat(long chatID)
+        {
+            Log.Trace($"Invoked: GetChat(chatID={chatID}");
+
+            var request = new RestRequest("getChat", Method.POST);
+
+            var parameters = new GetChatParams
+            {
+                chat_id = $"{chatID}",
+            };
+            var jsonParams = Newtonsoft.Json.JsonConvert.SerializeObject(parameters, new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
+            request.AddParameter("application/json; charset=utf-8", jsonParams, ParameterType.RequestBody);
+            request.RequestFormat = DataFormat.Json;
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            Chat result = null;
+
+            Semaphore sem = new Semaphore(0, 1);
+            _restClient.ExecuteAsync<Result<Chat>>(request, (restResult) =>
+            {
+                if (restResult.Data.OK)
+                {
+                    result = restResult.Data.Data;
+                    Log.Trace($"{request.Resource}/{request.Method} returned in {sw.ElapsedMilliseconds} milliseconds");
+                }
+                else
+                {
+                    Log.Error($"Error in '{request.Resource}/{request.Method} ': Code: \"{restResult.Data.ErrorCode}\" Description: \"{restResult.Data.Description}\"");
+                }
+                sem.Release();
+                sw.Stop();
+            }
+            );
+            if (!sem.WaitOne(ForwardMessageTimeout))
+            {
+                string error = $"Timeout waiting for {request.Resource}/{request.Method} after {sw.ElapsedMilliseconds} milliseconds.";
+                Log.Error(error);
+                throw new TimeoutException(error);
+            }
+
+            return result;
+        }
+
+
     }
 }

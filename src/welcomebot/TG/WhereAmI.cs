@@ -2,7 +2,9 @@
 using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.Events;
+using Botje.Messaging.Models;
 using Ninject;
+using System;
 using System.Linq;
 
 namespace welcomebot.TG
@@ -45,10 +47,17 @@ namespace welcomebot.TG
             var firstEntity = e.Message?.Entities?.FirstOrDefault();
             if (null != firstEntity && firstEntity.Type == "bot_command" && firstEntity.Offset == 0)
             {
+                string myName = Client.GetMe().Username;
                 string commandText = e.Message.Text.Substring(firstEntity.Offset, firstEntity.Length);
-                if (commandText == "/whereami" || commandText == $"/whereami@{me.Username}")
+                if (commandText.Contains("@") && !commandText.EndsWith($"@{myName}", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    Client.SendMessageToChat(e.Message.Chat.ID, $"<b>Public chat:</b> {e.Message.Chat.ID}");
+                    // not for me
+                    _log.Trace($"Got command '{commandText}' but it is not for me.");
+                }
+                else
+                {
+                    commandText = commandText.Split("@").First();
+                    ProcessCommand(e.Message, commandText);
                 }
             }
         }
@@ -59,10 +68,17 @@ namespace welcomebot.TG
             var firstEntity = e.Message?.Entities?.FirstOrDefault();
             if (null != firstEntity && firstEntity.Type == "bot_command" && firstEntity.Offset == 0)
             {
+                string myName = Client.GetMe().Username;
                 string commandText = e.Message.Text.Substring(firstEntity.Offset, firstEntity.Length);
-                if (commandText == "/whereami" || commandText == $"/whereami@{me.Username}")
+                if (commandText.Contains("@") && !commandText.EndsWith($"@{myName}", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    Client.SendMessageToChat(e.Message.Chat.ID, $"<b>Channel:</b> {e.Message.Chat.ID}");
+                    // not for me
+                    _log.Trace($"Got command '{commandText}' but it is not for me.");
+                }
+                else
+                {
+                    commandText = commandText.Split("@").First();
+                    ProcessCommand(e.Message, commandText);
                 }
             }
         }
@@ -73,19 +89,39 @@ namespace welcomebot.TG
             var firstEntity = e.Message?.Entities?.FirstOrDefault();
             if (null != firstEntity && firstEntity.Type == "bot_command" && firstEntity.Offset == 0)
             {
+                string myName = Client.GetMe().Username;
                 string commandText = e.Message.Text.Substring(firstEntity.Offset, firstEntity.Length);
-                if (commandText == "/setchannel")
+                if (commandText.Contains("@") && !commandText.EndsWith($"@{myName}", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    if (Settings.AdministratorUsernames.Contains(e.Message.From.Username))
-                    {
-                        // TODO: Update the settings here to set the publication channel(s)
-                        Client.SendMessageToChat(e.Message.Chat.ID, $"<b>Not implemented.</b>");
-                    }
+                    // not for me
+                    _log.Trace($"Got command '{commandText}' but it is not for me.");
                 }
-                if (commandText == "/whereami")
+                else
                 {
-                    Client.SendMessageToChat(e.Message.Chat.ID, $"<b>Private chat:</b> {e.Message.Chat.ID}");
+                    commandText = commandText.Split("@").First();
+                    ProcessCommand(e.Message, commandText);
                 }
+            }
+        }
+
+        private void ProcessCommand(Message message, string commandText)
+        {
+            var id = message.Chat.ID;
+            if (commandText == "/whereami")
+            {
+                Chat chat = Client.GetChat(id);
+                Client.SendMessageToChat(id, $"<b>Private chat:</b> \n"
+                    + $"ID = {id}\n"
+                    + $"Description = {chat.Description}\n"
+                    + $"Username = {chat.Username}\n"
+                    + $"FirstName = {chat.FirstName}\n"
+                    + $"LastName = {chat.LastName}\n"
+                    + $"InviteLink = {chat.InviteLink}\n"
+                    + $"PinnedMessage.ID = {chat.PinnedMessage?.MessageID}\n"
+                    + $"PinnedMessage.Text = {chat.PinnedMessage?.Text}\n"
+                    + $"Title = {chat.Title}\n"
+                    + $"Type = {chat.Type}\n"
+                    );
             }
         }
     }

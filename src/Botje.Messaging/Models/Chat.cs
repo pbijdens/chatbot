@@ -28,17 +28,29 @@ namespace Botje.Messaging.Models
         [DeserializeAs(Name = "last_name")]
         public string LastName { get; set; }
 
+        // all_members_are_administrators Boolean Optional.True if a group has ‘All Members Are Admins’ enabled.
+        [DeserializeAs(Name = "all_members_are_administrators")]
+        public bool AllMembersAreAdministrators { get; set; }
+
+        //description String  Optionaxl.Description, for supergroups and channel chats. Returned only in getChat.
+        [DeserializeAs(Name = "description")]
+        public string Description { get; set; }
+
+        //invite_link String  Optional.Chat invite link, for supergroups and channel chats. Returned only in getChat.
+        [DeserializeAs(Name = "invite_link")]
+        public string InviteLink { get; set; }
+
+        //pinned_message Message Optional.Pinned message, for supergroups.Returned only in getChat.
+        [DeserializeAs(Name = "pinned_message")]
+        public Message PinnedMessage { get; set; }
+
+        //photo ChatPhoto   Optional.Chat photo. Returned only in getChat.
+        //sticker_set_name String  Optional.For supergroups, name of group sticker set.Returned only in getChat.
+        //can_set_sticker_set Boolean Optional.True, if the bot can change the group sticker set. Returned only in getChat.
+
         public override string ToString()
         {
             return $"Chat(ID=\"{ID}\", Type=\"{Type}\", Title=\"{Title}\", Username=\"{Username}\", FirstName=\"{FirstName}\", LastName=\"{LastName}\")";
         }
-
-        //all_members_are_administrators  Boolean Optional.True if a group has ‘All Members Are Admins’ enabled.
-        //photo ChatPhoto   Optional.Chat photo. Returned only in getChat.
-        //description String  Optional.Description, for supergroups and channel chats. Returned only in getChat.
-        //invite_link String  Optional.Chat invite link, for supergroups and channel chats. Returned only in getChat.
-        //pinned_message Message Optional.Pinned message, for supergroups.Returned only in getChat.
-        //sticker_set_name String  Optional.For supergroups, name of group sticker set.Returned only in getChat.
-        //can_set_sticker_set Boolean Optional.True, if the bot can change the group sticker set. Returned only in getChat.
     }
 }
