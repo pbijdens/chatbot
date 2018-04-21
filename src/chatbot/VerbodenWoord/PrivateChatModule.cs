@@ -9,7 +9,6 @@ using chatbot.VerbodenWoord.Model;
 using Ninject;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -169,7 +168,7 @@ namespace chatbot.VerbodenWoord
                     }
                     else if (commandText == "/help")
                     {
-                        Client.SendMessageToChat(e.Message.From.ID, File.ReadAllText("helpfile.txt"), "HTML");
+                        Client.SendMessageToChat(e.Message.From.ID, System.IO.File.ReadAllText("helpfile.txt"), "HTML");
                     }
                 }
             }
