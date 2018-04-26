@@ -187,8 +187,8 @@ namespace chatbot.ChatMgmt
 
             bannedUsers.ForEach(bu =>
             {
-                Client.SendMessageToChat(e.Message.Chat.ID, $"Gebruiker {bu.User.UsernameOrName()} is hier niet welkom. Er is/zijn {bu.Rules.Count} regels die dat zeggen.");
-                // Client.BanUser(e.Message.Chat.ID, bu.User.ID);
+                Client.SendMessageToChat(e.Message.Chat.ID, $"Gebruiker {bu.User.UsernameOrName()} is hier niet welkom. Er is/zijn {bu.Rules.Count} regels die dat zeggen. Ik ban deze gebruiker voor 1 uur.");
+                Client.KickChatMember(e.Message.Chat.ID, bu.User.ID, DateTimeOffset.UtcNow + TimeSpan.FromHours(1));
             });
         }
 
