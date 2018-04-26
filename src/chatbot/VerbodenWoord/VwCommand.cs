@@ -27,7 +27,7 @@ namespace chatbot.VerbodenWoord
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
 
         [Inject]
-        public ISettingsManager Settings { get; set; }
+        public ISettingsService Settings { get; set; }
 
         private DbSet<Model.VerbodenWoordData> GetVerbodenWoordCollection() => DB.GetCollection<Model.VerbodenWoordData>("verbodenwoord");
         private DbSet<Model.GeradenWoord> GetGeradenWoordCollection() => DB.GetCollection<Model.GeradenWoord>("geradenwoord");

@@ -21,7 +21,7 @@ namespace chatbot.TgCommands
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
 
         [Inject]
-        public ISettingsManager Settings { get; set; }
+        public ISettingsService Settings { get; set; }
 
         public void Startup()
         {
@@ -76,7 +76,7 @@ namespace chatbot.TgCommands
                 string commandText = e.Message.Text.Substring(firstEntity.Offset, firstEntity.Length);
                 if (commandText == "/setchannel")
                 {
-                    if (Settings.AdministratorUsernames.Contains(e.Message.From.Username))
+                    if (Settings.AdministratorUserIDs.Contains($"{e.Message.From.ID}"))
                     {
                         // TODO: Update the settings here to set the publication channel(s)
                         Client.SendMessageToChat(e.Message.Chat.ID, $"<b>Not implemented.</b>");

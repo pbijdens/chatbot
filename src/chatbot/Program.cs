@@ -1,12 +1,10 @@
 ﻿using Botje.Core;
 using Botje.Core.Commands;
 using Botje.Core.Loggers;
-using Botje.Core.Services;
 using Botje.Core.Utils;
 using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.PrivateConversation;
-using Botje.Messaging.Services;
 using Botje.Messaging.Telegram;
 using Ninject;
 using System;
@@ -19,30 +17,24 @@ namespace chatbot
     {
         static void Main(string[] args)
         {
-            var settings = new JsonSettingsReader();
 
             // These two settings files are excluded for the GIT solution
 #if DEBUG
-            settings.Read("settings.debug.json", "default-settings.json");
+            var settings = JsonSettings.FromFile("settings.debug.json");
 #else
-            settings.Read("settings.release.json", "default-settings.json");
+            var settings = JsonSettings.FromFile("settings.release.json");
 #endif
-            TimeUtils.Initialize(settings.Timezones);
+            TimeUtils.Initialize(settings.Timezones?.ToArray());
 
             var kernel = new StandardKernel();
             kernel.Bind<ILoggerFactory>().To<ConsoleLoggerFactory>();
-            kernel.Bind<ISettingsManager>().ToConstant(settings);
+            kernel.Bind<ISettingsService>().ToConstant(settings);
 
             // Core services
             var database = kernel.Get<Database>();
             database.Setup("Data");
             kernel.Bind<IDatabase>().ToConstant(database);
             kernel.Bind<IPrivateConversationManager>().To<PrivateConversationManager>().InSingletonScope();
-
-            // Google location API
-            var googleLocationAPIService = kernel.Get<GoogleAddressService>();
-            googleLocationAPIService.SetApiKey(settings.GoogleLocationAPIKey);
-            kernel.Bind<ILocationToAddressService>().ToConstant(googleLocationAPIService);
 
             // Set up the messaging client
             CancellationTokenSource source = new CancellationTokenSource();
@@ -61,14 +53,16 @@ namespace chatbot
 
             // Simple set-up
             kernel.Bind<IBotModule>().To<TgCommands.WhereAmI>().InSingletonScope();
-
-            // Set up the components
             kernel.Bind<IBotModule>().To<VerbodenWoord.PrivateChatModule>().InSingletonScope();
             kernel.Bind<IBotModule>().To<VerbodenWoord.ProcessVerbodenWoord>().InSingletonScope();
             kernel.Bind<IBotModule>().To<VerbodenWoord.GeradenWoordCommands>().InSingletonScope();
             kernel.Bind<IBotModule>().To<VerbodenWoord.HuntCommand>().InSingletonScope();
             kernel.Bind<IBotModule>().To<ChatStats.GatherStatistics>().InSingletonScope();
             kernel.Bind<IBotModule>().To<ChatStats.ChatStatsCommands>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<ChatMgmt.Admin>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<ChatMgmt.Ban>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<ChatMgmt.WhoAmI>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<ChatMgmt.WhereAmI>().InSingletonScope();
 
             var modules = kernel.GetAll<IBotModule>().ToList();
 
