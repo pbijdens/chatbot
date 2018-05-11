@@ -46,7 +46,7 @@ namespace chatbot.VerbodenWoord
         private const string StateReadWord = "state.read.word";
         private const string StateReadReply = "state.read.reply";
 
-        private int MaxWordsForUser(long userId) => 7;
+        private int MaxWordsForUser(long userId) => 32;
 
         public void Shutdown()
         {

@@ -80,61 +80,77 @@ namespace chatbot.VerbodenWoord
             string input = e.Message.Text + ". " + e.Message.Caption;
             var verbodenWoordCollection = GetVerbodenWoordCollection();
 
-            bool isVerbodenWoordMatch = CheckForPossibleWordMatch(input, verbodenWoordCollection);
-            if (isVerbodenWoordMatch)
+            MatchCollection matches = CheckForPossibleWordMatch(input, verbodenWoordCollection);
+            if (matches != null && matches.Count > 0)
             {
+                _log.Info($"Message \"{input}\" matches regex {_woordenRegexp}. Matched: {matches.Count}: {string.Join(", ", matches.Select(x => x.ToString()))}");
+
                 // check if the match is one of the eligible forbidden words
                 var matchingRecords = new List<VerbodenWoordData>();
-#if DEBUG
-                var eligibleWoorden = verbodenWoordCollection.Find(x => true);
-#else
-                var eligibleWoorden = verbodenWoordCollection.Find(x => x.OwnerUserId != e.Message.From.ID);
-#endif
-                foreach (var record in eligibleWoorden)
+                foreach (var match in matches.Skip(0)) // fixes sily typing error
                 {
-                    string expr = string.Join("|", record.Woorden.Select(x => $"{Regex.Escape(x)}").OrderBy(x => x).Distinct());
-                    string pattern = $@"(?:^|[{RegexInterpunction}\s])({expr})(?:$|[{RegexInterpunction}\s])";
-                    if (Regex.IsMatch(input, expr, RegexOptions.IgnoreCase))
-                    {
-                        matchingRecords.Add(record);
-                    }
+                    _log.Info($"{match.Groups[1].Value}");
+                    matchingRecords.AddRange(verbodenWoordCollection.Find(x => x.Woorden.Where(w => string.Equals(w, match.Groups[1].Value, StringComparison.InvariantCultureIgnoreCase)).Any()));
                 }
 
-                _log.Trace($"Message \"{input}\" matches {matchingRecords.Count} record(s).");
+                _log.Info($"[0] Message \"{input}\" matches {matchingRecords.Count} record(s).");
+                foreach (var record in matchingRecords)
+                {
+                    var wstr = string.Join(", ", record.Woorden);
+                    _log.Info($"  [0]  {record.OwnerName} - {record.ID} - {wstr} - {record.CreationDate}");
+                }
+                _log.Info("---");
+
+                //matchingRecords.RemoveAll(x => x.OwnerUserId == e.Message.From.ID);
+
+                _log.Info($"[1] Remating matches: {matchingRecords.Count} record(s) after removing items owned by the sender.");
+                foreach (var record in matchingRecords)
+                {
+                    var wstr = string.Join(", ", record.Woorden);
+                    _log.Info($"  [1] {record.OwnerName} - {record.ID} - {wstr} - {record.CreationDate}");
+                }
+                _log.Info("---");
+
                 if (matchingRecords.Count > 0)
                 {
-                    var selectedIndex = _rnd.Next(matchingRecords.Count);
-                    var match = matchingRecords[selectedIndex];
-
-                    verbodenWoordCollection.Delete(x => x.UniqueID == match.UniqueID);
-
-                    var age = DateTime.UtcNow - match.CreationDate;
-                    string message = $"Een verboden woord [{string.Join(", ", match.Woorden.Select(w => MessageUtils.HtmlEscape(w)))}] is geraden door {MessageUtils.HtmlEscape(e.Message.From.DisplayName())}. Dit woord was {TimeUtils.AsReadableTimespan(age)} geleden aangewezen door {MessageUtils.HtmlEscape(match.OwnerName)}.";
-
-                    Client.SendMessageToChat(e.Message.Chat.ID, message, "HTML", true, false);
-                    Client.SendMessageToChat(match.OwnerUserId, message, "HTML", true, false);
-                    Client.ForwardMessageToChat(e.Message.Chat.ID, match.ReplyChatID, match.ReplyMessageID);
-
-                    _log.Info($"Selected match with ID {match.ID} - {message}");
-
-                    var geradenWoord = new GeradenWoord
-                    {
-                        GuessedByUserId = e.Message.From.ID,
-                        GuessedByUserName = e.Message.From.UsernameOrName(),
-                        GuessedByUserNameLowerCase = e.Message.From.UsernameOrName().ToLower(),
-                        Message = e.Message,
-                        OwnerUserId = match.OwnerUserId,
-                        OwnerUserName = match.OwnerName,
-                        OwnerUserNameLowerCase = match.OwnerName?.ToLower(),
-                        VerbodenWoord = match,
-                        When = DateTime.UtcNow
-                    };
-                    GetGeradenWoordCollection().Insert(geradenWoord);
+                    TriggerRandomMatchingRecord(e, verbodenWoordCollection, matchingRecords);
                 }
             }
         }
 
-        private bool CheckForPossibleWordMatch(string input, DbSet<VerbodenWoordData> verbodenWoordCollection)
+        private void TriggerRandomMatchingRecord(PublicMessageEventArgs e, DbSet<VerbodenWoordData> verbodenWoordCollection, List<VerbodenWoordData> matchingRecords)
+        {
+            var selectedIndex = _rnd.Next(matchingRecords.Count);
+            var match = matchingRecords[selectedIndex];
+
+            verbodenWoordCollection.Delete(x => x.UniqueID == match.UniqueID);
+
+            var age = DateTime.UtcNow - match.CreationDate;
+            string message = $"Een verboden woord [{string.Join(", ", match.Woorden.Select(w => MessageUtils.HtmlEscape(w)))}] is geraden door {MessageUtils.HtmlEscape(e.Message.From.DisplayName())}. Dit woord was {TimeUtils.AsReadableTimespan(age)} geleden aangewezen door {MessageUtils.HtmlEscape(match.OwnerName)}.";
+
+            Client.SendMessageToChat(e.Message.Chat.ID, message, "HTML", true, false);
+            Client.SendMessageToChat(match.OwnerUserId, message, "HTML", true, false);
+            Client.ForwardMessageToChat(e.Message.Chat.ID, match.ReplyChatID, match.ReplyMessageID);
+
+            _log.Info($"Selected match with ID {match.ID} - {message}");
+
+            var geradenWoord = new GeradenWoord
+            {
+                GuessedByUserId = e.Message.From.ID,
+                GuessedByUserName = e.Message.From.UsernameOrName(),
+                GuessedByUserNameLowerCase = e.Message.From.UsernameOrName().ToLower(),
+                Message = e.Message,
+                OwnerUserId = match.OwnerUserId,
+                OwnerUserName = match.OwnerName,
+                OwnerUserNameLowerCase = match.OwnerName?.ToLower(),
+                VerbodenWoord = match,
+                When = DateTime.UtcNow
+            };
+
+            GetGeradenWoordCollection().Insert(geradenWoord);
+        }
+
+        private MatchCollection CheckForPossibleWordMatch(string input, DbSet<VerbodenWoordData> verbodenWoordCollection)
         {
             Regex re = _woordenRegexp;
             if (null == re)
@@ -146,12 +162,12 @@ namespace chatbot.VerbodenWoord
                     string pattern = $@"(?:^|[{RegexInterpunction}\s])({wordsExpression})(?:$|[{RegexInterpunction}\s])";
                     _woordenRegexp = re = new Regex(pattern, RegexOptions.IgnoreCase);
 
-                    _log.Trace($"Set regular expression to \"{re}\"");
+                    _log.Info($"Set regular expression to \"{re}\"");
                 }
             }
 
-            var matches = re.IsMatch(input);
-            return matches;
+            var result = re.Matches(input);
+            return result;
         }
 
         private bool IsDuplicateInput(PublicMessageEventArgs e)
