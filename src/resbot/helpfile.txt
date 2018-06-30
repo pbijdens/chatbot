@@ -1,5 +1,5 @@
 ﻿/claim
-If youre the first to do that you're the only admin of the bot in this channel
+If you're the first to do that you're the only admin of the bot in this channel
 
 /admin &lt;add|delete|list&gt; &lt;userid&gt;
 Add or remove chat admins
