@@ -3,6 +3,7 @@ using Botje.Core.Utils;
 using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.Events;
+using chatbot.Services;
 using Ninject;
 using System;
 using System.Linq;
@@ -22,6 +23,9 @@ namespace chatbot.VerbodenWoord
 
         [Inject]
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
+
+        [Inject]
+        public ITimeService TimeService { get; set; }
 
         private DbSet<Model.VerbodenWoordData> GetVerbodenWoordCollection() => DB.GetCollection<Model.VerbodenWoordData>("verbodenwoord");
 
@@ -84,7 +88,7 @@ namespace chatbot.VerbodenWoord
                 var w = woorden[i];
                 var lenstr = string.Join(",", w.Woorden.Select(x => $"{x.Length}"));
                 string woordwoorden = w.Woorden.Count == 1 ? "woord" : "woorden";
-                sb.AppendLine($" {i + 1}. {MessageUtils.HtmlEscape(w.OwnerName)} heeft al {TimeUtils.AsReadableTimespan(DateTime.UtcNow - w.CreationDate)} {w.Woorden.Count} {woordwoorden} [{lenstr}] staan");
+                sb.AppendLine($" {i + 1}. {MessageUtils.HtmlEscape(w.OwnerName)} heeft al {TimeService.AsReadableTimespan(DateTime.UtcNow - w.CreationDate)} {w.Woorden.Count} {woordwoorden} [{lenstr}] staan");
             }
             Client.SendMessageToChat(e.Message.Chat.ID, $"{sb}");
         }

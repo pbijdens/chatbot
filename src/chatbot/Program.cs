@@ -6,6 +6,7 @@ using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.PrivateConversation;
 using Botje.Messaging.Telegram;
+using chatbot.Services;
 using Ninject;
 using System;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace chatbot
             var kernel = new StandardKernel();
             kernel.Bind<ILoggerFactory>().To<ConsoleLoggerFactory>();
             kernel.Bind<ISettingsService>().ToConstant(settings);
+            kernel.Bind<ITimeService>().To<TimeService>().InSingletonScope();
 
             // Core services
             var database = kernel.Get<Database>();

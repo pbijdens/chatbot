@@ -1,0 +1,4 @@
+﻿{
+    "DataDirectory": "..\\..\\Data",
+    "Timezones": [ "Central European Standard Time", "Europe/Amsterdam", "Europe/Berin", "UTC" ]
+}

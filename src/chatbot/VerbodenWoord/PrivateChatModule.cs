@@ -5,6 +5,7 @@ using Botje.Messaging;
 using Botje.Messaging.Events;
 using Botje.Messaging.Models;
 using Botje.Messaging.PrivateConversation;
+using chatbot.Services;
 using chatbot.VerbodenWoord.Model;
 using Ninject;
 using System;
@@ -35,6 +36,9 @@ namespace chatbot.VerbodenWoord
 
         [Inject]
         public IBotModule[] Modules { set { _publicChatModules = value.OfType<ProcessVerbodenWoord>().ToList(); } }
+
+        [Inject]
+        public ITimeService TimeService { get; set; }
 
         const string RegexInterpunction = @"\!\.\,\;\:\?\""\(\)\[\]";
 
@@ -129,7 +133,7 @@ namespace chatbot.VerbodenWoord
                 foreach (var woord in woorden.OrderBy(w => w.CreationDate))
                 {
                     status.AppendLine($"");
-                    status.AppendLine($"<b>Sinds:</b> {TimeUtils.AsReadableTimespan(DateTime.UtcNow - woord.CreationDate)}");
+                    status.AppendLine($"<b>Sinds:</b> {TimeService.AsReadableTimespan(DateTime.UtcNow - woord.CreationDate)}");
                     status.AppendLine($"<b>Woorden ({woord.Woorden.Count}):</b>");
                     foreach (var w in woord.Woorden)
                     {
@@ -137,7 +141,7 @@ namespace chatbot.VerbodenWoord
                     }
                 }
                 Client.SendMessageToChat(e.CallbackQuery.From.ID, status.ToString(), "HTML");
-                Client.SendMessageToChat(e.CallbackQuery.From.ID, $"Je hebt in totaal {woorden.Count} woord(en) ingesteld, de oudste staat al {TimeUtils.AsReadableTimespan(DateTime.UtcNow - woorden.First().CreationDate)}", "HTML", null, null, null, CreateBackKeyboardMarkup(e.CallbackQuery.From));
+                Client.SendMessageToChat(e.CallbackQuery.From.ID, $"Je hebt in totaal {woorden.Count} woord(en) ingesteld, de oudste staat al {TimeService.AsReadableTimespan(DateTime.UtcNow - woorden.First().CreationDate)}", "HTML", null, null, null, CreateBackKeyboardMarkup(e.CallbackQuery.From));
             }
             else
             {
@@ -232,7 +236,7 @@ namespace chatbot.VerbodenWoord
             if (woorden.Any())
             {
                 var age = DateTime.UtcNow - woorden.First().CreationDate;
-                sb.Append($"Je oudste woord is {TimeUtils.AsReadableTimespan(age)} oud. ");
+                sb.Append($"Je oudste woord is {TimeService.AsReadableTimespan(age)} oud. ");
             }
 
             InlineKeyboardMarkup inlineKeyboard = CreateInlineKeyboardMarkup(user, woorden);

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "resbot": {
+      "commandName": "Project",
+      "commandLineArgs": "\"464986361:AAFnWoA-Lc021K51MX2a1NN-Y-I8ne3zdW8\" \"settings.json\""
+    }
+  }
+}

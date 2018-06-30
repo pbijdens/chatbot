@@ -3,6 +3,7 @@ using Botje.Core.Utils;
 using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.Events;
+using chatbot.Services;
 using chatbot.VerbodenWoord.Model;
 using Ninject;
 using System;
@@ -23,6 +24,9 @@ namespace chatbot.VerbodenWoord
 
         [Inject]
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
+
+        [Inject]
+        public ITimeService TimeService { get; set; }
 
         private DbSet<Model.GeradenWoord> GetGeradenWoordCollection() => DB.GetCollection<Model.GeradenWoord>("geradenwoord");
 
@@ -120,7 +124,7 @@ namespace chatbot.VerbodenWoord
             var sortedAggregatedCollection = aggregatedCollection.OrderByDescending(x => x.Count).Take(number);
             if (sortedAggregatedCollection.Count() < number) { number = sortedAggregatedCollection.Count(); }
             StringBuilder result = new StringBuilder();
-            result.AppendLine($"Top <b>{number}</b> {whatisit} vanaf <b>{TimeUtils.AsDutchString(DateTime.Now - ago)}</b>:");
+            result.AppendLine($"Top <b>{number}</b> {whatisit} vanaf <b>{TimeService.AsDutchString(DateTime.Now - ago)}</b>:");
             int place = 1;
             foreach (var record in sortedAggregatedCollection)
             {

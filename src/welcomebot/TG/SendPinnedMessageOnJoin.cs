@@ -11,7 +11,7 @@ using welcomebot.Model;
 
 namespace welcomebot.TG
 {
-    public class SendPinnedMessageOnJoin : IBotModule
+    public class SendMessageOnJoin : IBotModule
     {
         private ILogger _log;
 

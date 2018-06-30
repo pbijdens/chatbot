@@ -4,6 +4,7 @@ using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.Events;
 using Botje.Messaging.PrivateConversation;
+using chatbot.Services;
 using chatbot.VerbodenWoord.Model;
 using Ninject;
 using System;
@@ -18,6 +19,9 @@ namespace chatbot.VerbodenWoord
         private ILogger _log;
 
         const string RegexInterpunction = @"\!\.\,\;\:\?\""\(\)\[\]";
+
+        [Inject]
+        public ITimeService TimeService { get; set; }
 
         [Inject]
         public IMessagingClient Client { get; set; }
@@ -101,7 +105,7 @@ namespace chatbot.VerbodenWoord
                 }
                 _log.Info("---");
 
-                //matchingRecords.RemoveAll(x => x.OwnerUserId == e.Message.From.ID);
+                matchingRecords.RemoveAll(x => x.OwnerUserId == e.Message.From.ID);
 
                 _log.Info($"[1] Remating matches: {matchingRecords.Count} record(s) after removing items owned by the sender.");
                 foreach (var record in matchingRecords)
@@ -126,7 +130,7 @@ namespace chatbot.VerbodenWoord
             verbodenWoordCollection.Delete(x => x.UniqueID == match.UniqueID);
 
             var age = DateTime.UtcNow - match.CreationDate;
-            string message = $"Een verboden woord [{string.Join(", ", match.Woorden.Select(w => MessageUtils.HtmlEscape(w)))}] is geraden door {MessageUtils.HtmlEscape(e.Message.From.DisplayName())}. Dit woord was {TimeUtils.AsReadableTimespan(age)} geleden aangewezen door {MessageUtils.HtmlEscape(match.OwnerName)}.";
+            string message = $"Een verboden woord [{string.Join(", ", match.Woorden.Select(w => MessageUtils.HtmlEscape(w)))}] is geraden door {MessageUtils.HtmlEscape(e.Message.From.DisplayName())}. Dit woord was {TimeService.AsReadableTimespan(age)} geleden aangewezen door {MessageUtils.HtmlEscape(match.OwnerName)}.";
 
             Client.SendMessageToChat(e.Message.Chat.ID, message, "HTML", true, false);
             Client.SendMessageToChat(match.OwnerUserId, message, "HTML", true, false);
@@ -205,7 +209,7 @@ namespace chatbot.VerbodenWoord
             string replyFmt = allReplies[_rnd.Next(allReplies.Length)];
             string replyStr = String.Format(replyFmt,
                 MessageUtils.HtmlEscape(hashRecord.User.ShortName()), // {0}
-                TimeUtils.AsReadableTimespan(DateTime.UtcNow - hashRecord.UtcWhen), // {1}
+                TimeService.AsReadableTimespan(DateTime.UtcNow - hashRecord.UtcWhen), // {1}
                 MessageUtils.HtmlEscape(e.Message.From.ShortName()), // {2}
                 hashRecord.MessageID, // {3}
                 hashRecord.ChatID // {4}

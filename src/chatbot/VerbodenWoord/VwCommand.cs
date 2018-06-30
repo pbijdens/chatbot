@@ -1,9 +1,9 @@
 ﻿using Botje.Core;
 using Botje.Core.Commands;
-using Botje.Core.Utils;
 using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.PrivateConversation;
+using chatbot.Services;
 using Ninject;
 using System;
 using System.Linq;
@@ -13,6 +13,9 @@ namespace chatbot.VerbodenWoord
     public class VwCommand : IConsoleCommand
     {
         private ILogger _log;
+
+        [Inject]
+        public ITimeService TimeService { get; set; }
 
         [Inject]
         public IMessagingClient Client { get; set; }
@@ -46,7 +49,7 @@ namespace chatbot.VerbodenWoord
             foreach (var w in woorden)
             {
                 var str = string.Join(", ", w.Woorden);
-                Console.WriteLine($"- {w.ID} : {TimeUtils.AsReadableTimespan(DateTime.UtcNow - w.CreationDate)} oud van {w.OwnerName} [#{w.OwnerUserId}]");
+                Console.WriteLine($"- {w.ID} : {TimeService.AsReadableTimespan(DateTime.UtcNow - w.CreationDate)} oud van {w.OwnerName} [#{w.OwnerUserId}]");
                 Console.WriteLine($"  Woorden: {str}");
                 Console.WriteLine($"  Reply: {w.ReplyChatID} {w.ReplyMessageID}");
             }

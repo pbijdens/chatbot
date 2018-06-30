@@ -5,6 +5,7 @@ using Botje.Messaging;
 using Botje.Messaging.Events;
 using Botje.Messaging.Models;
 using chatbot.ChatStats.Model;
+using chatbot.Services;
 using Ninject;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,9 @@ namespace chatbot.ChatStats
 
         [Inject]
         public ILoggerFactory LoggerFactory { set { _log = value.Create(GetType()); } }
+
+        [Inject]
+        public ITimeService TimeService { get; set; }
 
         private DbSet<Model.UserStatistics> GetStatisticsCollection() => DB.GetCollection<Model.UserStatistics>("userstats");
 
@@ -248,7 +252,7 @@ namespace chatbot.ChatStats
             if (sortedAggregatedCollection.Count() < number) { number = sortedAggregatedCollection.Count(); }
 
             StringBuilder result = new StringBuilder();
-            result.AppendLine($"Top <b>{number}</b> {what} vanaf <b>{TimeUtils.AsDutchString(DateTime.Now - ago)}</b>:");
+            result.AppendLine($"Top <b>{number}</b> {what} vanaf <b>{TimeService.AsDutchString(DateTime.Now - ago)}</b>:");
             int place = 1;
             foreach (var record in sortedAggregatedCollection)
             {

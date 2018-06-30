@@ -1,12 +1,10 @@
 ﻿using Botje.Core;
 using Botje.Core.Commands;
 using Botje.Core.Loggers;
-using Botje.Core.Services;
 using Botje.Core.Utils;
 using Botje.DB;
 using Botje.Messaging;
 using Botje.Messaging.PrivateConversation;
-using Botje.Messaging.Services;
 using Botje.Messaging.Telegram;
 using Ninject;
 using System;
@@ -39,10 +37,6 @@ namespace welcomebot
             kernel.Bind<IDatabase>().ToConstant(database);
             kernel.Bind<IPrivateConversationManager>().To<PrivateConversationManager>().InSingletonScope();
 
-            // Google location API
-            var googleLocationAPIService = kernel.Get<GoogleAddressService>();
-            googleLocationAPIService.SetApiKey(settings.GoogleLocationAPIKey);
-            kernel.Bind<ILocationToAddressService>().ToConstant(googleLocationAPIService);
 
             // Set up the messaging client
             CancellationTokenSource source = new CancellationTokenSource();
@@ -58,7 +52,7 @@ namespace welcomebot
             kernel.Bind<IConsoleCommand>().To<LogLevelCommand>().InSingletonScope();
             kernel.Bind<IConsoleCommand>().To<ConsoleCommands.MeCommand>().InSingletonScope();
             kernel.Bind<IBotModule>().To<TG.WhereAmI>().InSingletonScope();
-            kernel.Bind<IBotModule>().To<TG.SendPinnedMessageOnJoin>().InSingletonScope();
+            kernel.Bind<IBotModule>().To<TG.SendMessageOnJoin>().InSingletonScope();
 
             var modules = kernel.GetAll<IBotModule>().ToList();
 
