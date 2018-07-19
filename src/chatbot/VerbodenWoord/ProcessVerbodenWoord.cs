@@ -178,9 +178,11 @@ namespace chatbot.VerbodenWoord
         {
             // clean up the input, lowercase it and replace all consecutive non-readable characters to a single _
             string str = Regex.Replace($"{e.Message?.Text}{e.Message?.Caption}".ToLowerInvariant(), "[^a-zA-Z0-9]*", "_");
-            if (str.Length < 128) return false;
+            if (str.Length < 256) return false;
             var hash = HashUtils.CalculateSHA1Hash(str);
             var hashCollection = DB.GetCollection<MessageHash>();
+
+            hashCollection.Delete(x => (DateTime.UtcNow - x.UtcWhen) > TimeSpan.FromDays(3)); // keep it clean
             var hashRecord = hashCollection.Find(x => x.Hash == hash).FirstOrDefault();
             if (hashRecord != null)
             {

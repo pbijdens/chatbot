@@ -7,6 +7,7 @@ using Botje.Messaging;
 using Botje.Messaging.PrivateConversation;
 using Botje.Messaging.Telegram;
 using chatbot.Services;
+using chatbot.TgCommands;
 using Ninject;
 using System;
 using System.Linq;
@@ -50,8 +51,10 @@ namespace chatbot
             kernel.Bind<IConsoleCommand>().To<PingCommand>().InSingletonScope();
             kernel.Bind<IConsoleCommand>().To<HelpCommand>().InSingletonScope();
             kernel.Bind<IConsoleCommand>().To<LogLevelCommand>().InSingletonScope();
-            kernel.Bind<IConsoleCommand>().To<TgCommands.MeCommand>().InSingletonScope();
+            kernel.Bind<IConsoleCommand>().To<MeCommand>().InSingletonScope();
             kernel.Bind<IConsoleCommand>().To<VerbodenWoord.VwCommand>().InSingletonScope();
+            kernel.Bind<IConsoleCommand>().To<FailedCommand>().InSingletonScope();
+            kernel.Bind<IConsoleCommand>().To<RetryCommand>().InSingletonScope();
 
             // Simple set-up
             kernel.Bind<IBotModule>().To<TgCommands.WhereAmI>().InSingletonScope();

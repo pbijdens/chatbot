@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Botje.Messaging" Version="0.50.1804.29" />
+    <PackageReference Include="Botje.Messaging" Version="0.50.1807.19" />
     <PackageReference Include="Ninject" Version="3.3.4" />
   </ItemGroup>
 
