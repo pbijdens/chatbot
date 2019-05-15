@@ -105,9 +105,12 @@ namespace chatbot.VerbodenWoord
                 }
                 _log.Info("---");
 
-                matchingRecords.RemoveAll(x => x.OwnerUserId == e.Message.From.ID);
+                _ = matchingRecords.RemoveAll(x => x.OwnerUserId == e.Message.From.ID);
+                _log.Info($"[1] Remaining matches: {matchingRecords.Count} record(s) after removing items owned by the sender.");
 
-                _log.Info($"[1] Remating matches: {matchingRecords.Count} record(s) after removing items owned by the sender.");
+                _ = matchingRecords.RemoveAll(x => x.OwnerUserId == 183899219L); // remove anything by @Se7enOfNine
+                _log.Info($"[2] Remaining matches: {matchingRecords.Count} record(s) after removing items owned by the sender.");
+
                 foreach (var record in matchingRecords)
                 {
                     var wstr = string.Join(", ", record.Woorden);
