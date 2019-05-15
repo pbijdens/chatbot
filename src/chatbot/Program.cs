@@ -41,7 +41,7 @@ namespace chatbot
 
             // Set up the messaging client
             CancellationTokenSource source = new CancellationTokenSource();
-            TelegramClient client = kernel.Get<ThrottlingTelegramClient>();
+            TelegramClient client = kernel.Get<JeHoofdTelegramClient>();
             client.Setup(settings.BotKey, source.Token);
             kernel.Bind<IMessagingClient>().ToConstant(client);
 
